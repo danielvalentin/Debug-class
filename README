@@ -1,1 +1,7 @@
 Just a debug class that adds readability to dumps with indentations, color coding and type/parameters.
+
+Usage:
+
+debug::dump($var);
+debug::dump($var1, $var2, $var3, ...);
+debug::_dump($var);

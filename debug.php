@@ -25,7 +25,7 @@ class debug
 		echo "\n-->\n";
 	}
 	
-	public static function dump($value, $start = true, $key = false, $silent = false)
+	private static function dodump($value, $start = true, $key = false, $silent = false)
 	{
 		if($start)
 		{
@@ -42,7 +42,7 @@ class debug
 					$color = self::get_random_color();
 					foreach($value as $key => $val)
 					{
-						self::dump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>', false));
+						self::dodump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>', false));
 					}
 				echo self::close_ul();
 			echo self::close_li();
@@ -56,7 +56,7 @@ class debug
 					$color = self::get_random_color();
 					foreach((array)$value as $key => $val)
 					{
-						self::dump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>'));
+						self::dodump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>'));
 					}
 					if(get_class($value) != 'stdClass')
 					{
@@ -141,6 +141,22 @@ class debug
 		if($start)
 		{
 			echo self::close_ul();
+		}
+	}
+	
+	public static function dump()
+	{
+		$args = func_get_args();
+		if(count($args) > 1)
+		{
+			foreach($args as $arg)
+			{
+				self::dodump($arg);
+			}
+		}
+		else
+		{
+			self::dodump($args);
 		}
 	}
 	
