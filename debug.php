@@ -17,12 +17,39 @@ class debug
 	private static $level = 1;
 	private static $silent = false;
 	
-	public static function _dump($value, $start = true, $key = false)
+	public static function _dump($value)
 	{
 		self::$silent = true;
 		echo "\n<!--\n";
-		echo self::dump($value, $start, $key, true);
+		$args = func_get_args();
+		if(count($args) > 1)
+		{
+			foreach($args as $arg)
+			{
+				self::dodump($arg, true, false, true);
+			}
+		}
+		else
+		{
+			self::dodump($args, true, false, true);
+		}
 		echo "\n-->\n";
+	}
+	
+	public static function dump()
+	{
+		$args = func_get_args();
+		if(count($args) > 1)
+		{
+			foreach($args as $arg)
+			{
+				self::dodump($arg);
+			}
+		}
+		else
+		{
+			self::dodump($args);
+		}
 	}
 	
 	private static function dodump($value, $start = true, $key = false, $silent = false)
@@ -141,22 +168,6 @@ class debug
 		if($start)
 		{
 			echo self::close_ul();
-		}
-	}
-	
-	public static function dump()
-	{
-		$args = func_get_args();
-		if(count($args) > 1)
-		{
-			foreach($args as $arg)
-			{
-				self::dodump($arg);
-			}
-		}
-		else
-		{
-			self::dodump($args);
 		}
 	}
 	
