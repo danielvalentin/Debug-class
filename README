@@ -4,4 +4,4 @@ Usage:
 
 debug::dump($var);
 debug::dump($var1, $var2, $var3, ...);
-debug::_dump($var);
+debug::_dump($var); // Silent version
