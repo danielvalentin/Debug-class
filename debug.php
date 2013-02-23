@@ -4,7 +4,7 @@
  * Just a debug class that adds readability to dumps with indentations, color coding and type/parameters.
  * 
  * Usage:
- * debug::dump($my_var); or debug::_dump($my_var); for silent version.
+ * d::dump($my_var); or d::_dump($my_var); for silent version.
  * $my_var can be anything.
  * 
  * Known issues:
