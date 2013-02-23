@@ -2,6 +2,6 @@ Just a debug class that adds readability to dumps with indentations, color codin
 
 Usage:
 
-debug::dump($var);
-debug::dump($var1, $var2, $var3, ...);
-debug::_dump($var); // Silent version
+d::dump($var);
+d::dump($var1, $var2, $var3, ...);
+d::_dump($var); // Silent version
