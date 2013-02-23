@@ -11,11 +11,12 @@
  *  - Infinite recursions are not handled.
  *  - _dump has (loads of) indentation issues
  */
-class debug
+abstract class d
 {
 	private static $colors = array("green", "red", "blue", "orange", "purple");
 	private static $level = 1;
 	private static $silent = false;
+	private static $numcolor;
 	
 	public static function _dump($value)
 	{
@@ -35,7 +36,7 @@ class debug
 		}
 		echo "\n-->\n";
 	}
-	
+
 	public static function dump()
 	{
 		$args = func_get_args();
@@ -51,94 +52,94 @@ class debug
 			self::dodump($args);
 		}
 	}
-	
+
 	private static function dodump($value, $start = true, $key = false, $silent = false)
 	{
 		if($start)
 		{
 			echo self::open_ul();
 		}
-		
-		if(is_array($value))
+
+		if(is_array($value) && !is_object($value))
 		{
 			echo self::open_li();
-				echo self::get_key_headline($key);
-				echo ' ';
-				echo self::get_item_headline($value);
-				echo self::open_ul();
-					$color = self::get_random_color();
-					foreach($value as $key => $val)
-					{
-						self::dodump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>', false));
-					}
-				echo self::close_ul();
+			echo self::get_key_headline($key);
+			echo ' ';
+			echo self::get_item_headline($value);
+			echo self::open_ul();
+			$color = self::get_random_color();
+			foreach($value as $key => $val)
+			{
+				self::dodump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>', false));
+			}
+			echo self::close_ul();
 			echo self::close_li();
 		}
 		elseif(is_object($value))
 		{
 			echo self::open_li();
-				echo self::get_key_headline($key);
-				echo self::get_item_headline($value);
+			echo self::get_key_headline($key);
+			echo self::get_item_headline($value);
+			echo self::open_ul();
+			$color = self::get_random_color();
+			foreach((array)$value as $key => $val)
+			{
+				self::dodump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>'));
+			}
+			if(get_class($value) != 'stdClass')
+			{
+				$reflect = new ReflectionClass($value);
+				$methods = $reflect -> getMethods();
+				echo self::open_li() . self::output('Show class info (' . count($methods) . ' methods)', '<a href="#" onclick="var kid=this.parentNode.childNodes[1];if(kid.style.display==\'block\'){kid.style.display=\'none\';}else{kid.style.display=\'block\';};return false;">', '</a>', false);
+				echo self::open_ul('<ul class="methods" style="display:none;">');
+				echo self::open_li() . self::output('Methods', '<strong>', '</strong>', false);
 				echo self::open_ul();
-					$color = self::get_random_color();
-					foreach((array)$value as $key => $val)
+				foreach($methods as $m)
+				{
+					echo self::open_li();
+					if($m -> isPrivate())
 					{
-						self::dodump($val, false, self::output($key, '<span style="color:' . $color . ';">', '</span>'));
+						echo self::output('private', '<span style="color:red;">', '</span> ');
 					}
-					if(get_class($value) != 'stdClass')
+					if($m -> isProtected())
 					{
-						$reflect = new ReflectionClass($value);
-						$methods = $reflect -> getMethods();
-						echo self::open_li() . self::output('Show class info (' . count($methods) . ' methods)', '<a href="#" onclick="var kid=this.parentNode.childNodes[1];if(kid.style.display==\'block\'){kid.style.display=\'none\';}else{kid.style.display=\'block\';};return false;">', '</a>', false);
-							echo self::open_ul('<ul class="methods" style="display:none;">');
-								echo self::open_li() . self::output('Methods', '<strong>', '</strong>', false);
-									echo self::open_ul();
-									foreach($methods as $m)
-									{
-										echo self::open_li();
-											if($m -> isPrivate())
-											{
-												echo self::output('private', '<span style="color:red;">', '</span> ');
-											}
-											if($m -> isProtected())
-											{
-												echo self::output('protected', '<span style="color:blue;">', '</span> ');
-											}
-											if($m -> isPublic())
-											{
-												echo self::output('public', '<span style="color:green;">', '</span> ');
-											}
-											if($m -> isStatic())
-											{
-												echo self::output('static', '<em>', '</em> ');
-											}
-											echo $m -> name . '(';
-											$params = $m -> getParameters();
-											$numParams = count($params);
-											$i = 1;
-											foreach($params as $param)
-											{
-												echo '<em>' . $param -> getName() . '</em>';
-												if($i < $numParams)
-												{
-													echo ', ';
-												}
-												$i++;
-											}
-											echo ')';
-										echo self::close_li();
-									}
-									echo self::close_ul();
-								echo self::close_li();
-								
-								echo self::open_li() . self::output('Defined in', '<strong>', '</strong>');
-									echo self::open_ul();
-										echo self::open_li() . $reflect -> getFileName() . ' at line ' . $reflect -> getStartLine() . '</li>'; 
-									echo self::close_ul();
-								echo self::close_li();
-						echo self::close_ul();
+						echo self::output('protected', '<span style="color:blue;">', '</span> ');
+					}
+					if($m -> isPublic())
+					{
+						echo self::output('public', '<span style="color:green;">', '</span> ');
+					}
+					if($m -> isStatic())
+					{
+						echo self::output('static', '<em>', '</em> ');
+					}
+					echo $m -> name . '(';
+					$params = $m -> getParameters();
+					$numParams = count($params);
+					$i = 1;
+					foreach($params as $param)
+					{
+						echo '<em>' . $param -> getName() . '</em>';
+						if($i < $numParams)
+						{
+							echo ', ';
+						}
+						$i++;
+					}
+					echo ')';
 					echo self::close_li();
-					}
+				}
+				echo self::close_ul();
+				echo self::close_li();
+
+				echo self::open_li() . self::output('Defined in', '<strong>', '</strong>');
+				echo self::open_ul();
+				echo self::open_li() . $reflect -> getFileName() . ' at line ' . $reflect -> getStartLine() . '</li>'; 
+				echo self::close_ul();
+				echo self::close_li();
+				echo self::close_ul();
+				echo self::close_li();
+			}
 			echo self::close_ul();
 			echo self::close_li();
 		}
@@ -164,18 +165,24 @@ class debug
 			}
 			echo self::close_li();
 		}
-		
+
 		if($start)
 		{
 			echo self::close_ul();
 		}
 	}
-	
+
 	private static function get_random_color()
 	{
-		return self::$colors[rand(0,count(self::$colors)-1)];;
+		$number = rand(0,count(self::$colors)-1);
+		while($number == self::$numcolor)
+		{
+			$number = rand(0,count(self::$colors)-1);
+		}
+		self::$numcolor = $number;
+		return self::$colors[$number];;
 	}
-	
+
 	private static function open_ul($tag = false)
 	{
 		self::$level++;
@@ -189,7 +196,7 @@ class debug
 		}
 		return '<ul>';
 	}
-	
+
 	private static function close_ul()
 	{
 		self::$level--;
@@ -199,7 +206,7 @@ class debug
 		}
 		return '</ul>';
 	}
-	
+
 	private static function open_li()
 	{
 		if(self::$silent)
@@ -208,7 +215,7 @@ class debug
 		}
 		return '<li>';
 	}
-	
+
 	private static function close_li()
 	{
 		if(self::$silent)
@@ -217,7 +224,7 @@ class debug
 		}
 		return '</li>';
 	}
-	
+
 	private static function output($value, $opentag = '', $closetag = '', $indent = true)
 	{
 		if(self::$silent)
@@ -226,8 +233,8 @@ class debug
 		}
 		return $opentag . $value . $closetag;
 	}
-	
-	public static function get_key_headline($key, $hidden = false)
+
+	private static function get_key_headline($key, $hidden = false)
 	{
 		if($key !== false)
 		{
@@ -235,7 +242,7 @@ class debug
 		}
 		return '';
 	}
-	
+
 	private static function get_item_headline($item)
 	{
 		if(is_array($item))
@@ -252,5 +259,5 @@ class debug
 			return self::output('(' . ucfirst($type) . '): ', '<em>', '</em>', false);
 		}
 	}
-	
+
 }
